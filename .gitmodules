@@ -1,0 +1,3 @@
+[submodule "polyrank-docs"]
+	path = polyrank-docs
+	url = git@github.com:patrickmclaren/polyrank-docs.git
