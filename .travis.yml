@@ -1,0 +1,6 @@
+language: python
+install:
+  - sudo apt-add-repository -y ppa:aims/sagemath
+  - sudo apt-get update -qq
+  - sudo apt-get install sagemath-upstream-binary
+script: sage test/test.py
