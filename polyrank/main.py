@@ -1,9 +1,9 @@
 from collections import defaultdict
-#from sage.all import *
+from sage.all import *
 
 import itertools
 
-from polyrank import mmatrix
+from polyrank.mmatrix import MMatrix
 
 ##############################################################################
 # Helper Functions
@@ -20,7 +20,7 @@ def _join_dicts_of_lists(*ddicts):
         >>> _join_dicts_of_lists({ 1 : [3]}, { 1 : [4], 2 : [5]})
         { 1 : [3, 4], 2 : [5] }
     """
-        
+
     new_dict = defaultdict(list)
 
     for ddict in ddicts:
@@ -106,10 +106,10 @@ def find_conditions_rank_leq_n(mat, n):
 if __name__ == "__main__":
     R, (x, y) = PolynomialRing(QQ, 2, 'xy').objgens()
 
-    f = x + y
-    g = 0
-    h = 0
-    k = x + y
+    f = x
+    g = y
+    h = x
+    k = 2 * y
 
     mat = MMatrix([[f, g], [h, k]])
     n = 2

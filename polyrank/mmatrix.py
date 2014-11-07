@@ -62,7 +62,7 @@ class MMatrix():
 
         """
 
-        return self.matrix.dimensions()[0]
+        return self.matrix.dimensions()[1]
 
     def column_size(self):
         """
@@ -73,7 +73,7 @@ class MMatrix():
             int
         """
 
-        return self.matrix.dimensions()[1]
+        return self.matrix.dimensions()[0]
 
     def row_reduce(self):
         """
@@ -104,8 +104,11 @@ class MMatrix():
             non_zero.append(pivot)
             new_mat.scalar_mult(1/pivot, row=i)
 
-            for j in range(i+1, new_mat.row_size()):
-                new_mat.subtract_row(mat[i][j], i, j)
+            for j in range(new_mat.row_size()):
+                if i == j:
+                    continue
+
+                new_mat.subtract_row(new_mat[j][i], i, j)
 
             new_mat.scalar_mult(pivot, row=i)
 
@@ -212,7 +215,7 @@ class MMatrix():
     def apply_fn(self, fn, *args, **kwargs):
         """
         Apply ``fn`` with positional parameters ``args`` and keyword
-        parameters ``kwargs`` to the rows of :attr:`.matrix`.
+        parameters ``kwargs`` to the entries of :attr:`.matrix`.
 
         :param function fn: The function to apply to :attr:`.matrix`
         :param \*args args: Positional parameters to be applied to ``fn``
@@ -226,7 +229,7 @@ class MMatrix():
 
         for i in range(new_mat.row_size()):
             for j in range(new_mat.column_size()):
-                new_mat.update_entry(i, j, fn(mat[i][j], *args, **kwargs))
+                new_mat.update_entry(i, j, fn(new_mat[i][j], *args, **kwargs))
 
         return new_mat
 
