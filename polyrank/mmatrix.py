@@ -1,3 +1,5 @@
+from sage.all import *
+
 class MMatrix():
     """
     Decorator class for a Sage matrix of type :class:`sage.structure.element.Matrix`.
@@ -57,7 +59,7 @@ class MMatrix():
 
         :Returns Type:
             int
-        
+
         """
 
         return self.matrix.dimensions()[0]
@@ -119,8 +121,8 @@ class MMatrix():
             None
 
         .. warning::
-        
-           Not immutable.        
+
+           Not immutable.
         """
         if row is None:
             for i in range(self.row_size()):
@@ -139,7 +141,7 @@ class MMatrix():
             None
 
         .. warning::
-        
+
            Not immutable.
 
         """

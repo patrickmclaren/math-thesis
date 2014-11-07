@@ -2,9 +2,15 @@ git:
   submodules: false
 language: python
 install:
-  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-  - git submodule update --init --recursive
-  - sudo apt-add-repository -y ppa:aims/sagemath
-  - sudo apt-get update
-  - sudo apt-get install -y sagemath-upstream-binary
-script: sage test/test.py
+- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+- git submodule update --init --recursive
+- sudo apt-add-repository -y ppa:aims/sagemath
+- sudo apt-get update
+- sudo apt-get install -y sagemath-upstream-binary
+- sage --python -m easy_install pip
+- sage --python -m pip install -r requirements.txt
+script: sage --python -m test.test
+after_success: coveralls
+env:
+  global:
+    secure: TvO2dpMYwZGIS/9ZoatRR5XfuIHaXjF8nLu9S/CW9B1SlBtES3CeYX7WSVGaw4crLNiYW6Ha/JvArhRQDDUdLGDIQa6EVW8kDmXXSL5lVZ+yvwhN2MDJa21NT6iXKrDnOZPxpgGtr4jSQMX+yjPUsxJst4Routdu0GHTdjBgDNI=
