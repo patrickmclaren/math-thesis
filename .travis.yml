@@ -12,7 +12,7 @@ install:
 script:
 - sage --python -m test.test
 after_success:
-- coveralls
+- /usr/lib/sagemath/local/bin/coveralls
 env:
   global:
     secure: TvO2dpMYwZGIS/9ZoatRR5XfuIHaXjF8nLu9S/CW9B1SlBtES3CeYX7WSVGaw4crLNiYW6Ha/JvArhRQDDUdLGDIQa6EVW8kDmXXSL5lVZ+yvwhN2MDJa21NT6iXKrDnOZPxpgGtr4jSQMX+yjPUsxJst4Routdu0GHTdjBgDNI=
