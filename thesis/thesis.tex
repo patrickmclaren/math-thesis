@@ -1,5 +1,7 @@
 \documentclass{amsart}
 
+\usepackage{amssymb}
+
 \usepackage[utf8]{inputenc}
 
 \usepackage[
@@ -131,7 +133,7 @@ I've noted a sharp drop in the number of accessible resources regarding modules 
 
 \section{Introduction}
 
-A polynomial matrix is a linear operator on a module over a polynomial ring. The rank of a linear operator on a module is not well defined, however given a polynomial matrix, we can evaluate it's entries on $s \in F$ to produce a matrix $A(s)$ over a vector space. Then, we can proceed to determine the rank of $A(s)$.
+A polynomial matrix is a linear operator on a module over a polynomial ring. The rank of a linear operator on a module is not well defined, however given a polynomial matrix, we can evaluate it's entries on $s \in F$ to produce a matrix $A(s)$ on a vector space. Then, we can proceed to determine the rank of $A(s)$.
 
 The situation is slightly different if one does not immediately wish to obtain $A(s)$. Perhaps we would like to know about the conditions for which the matrix fails to have rank $m$. Suppose that by manipulating $A$, we can produce a row-reduced echelon form of $A$, say $A'$, such that $\mathrm{rank}\,A(s) = \mathrm{rank}\,A'(s)$. Then, one may examine the pivots to determine the rank. However, this leads to several problems:
 
@@ -174,9 +176,15 @@ Rather than selecting pivots which are not equal to the zero-polynomial, our met
   \label{fig:gaussian-eliminiation-example}
 \end{figure}
 
-\item Depending on our choice of pivots, we may potentially produce multiple matrices $A', A'', \ldots$ with the property $\mathrm{rank} \, A' = \mathrm{rank} \, A'' = \cdots = \mathrm{rank} \, A$. Given a collection of pivots, say $P', P''$, from $A', A''$, we would like some nice way of comparing $P_1$ and $P_2$.
+\item Depending on our choice of pivots, we could potentially produce multiple matrices $A', A'', \ldots$ from $A$ with the property $\mathrm{rank} \, A'(s) = \mathrm{rank} \, A''(s) = \cdots = \mathrm{rank} \, A(s)$. Given a collection of pivots, say $P', P''$, from $A', A''$, we would like some nice way of comparing $P'$ and $P''$.
 
 \end{enumerate}
+
+\subsection{Outline of Method}
+
+For every pivot $a_{i,i}$ that we choose to be non-zero, we must also take into account the possibility that $a_{i,i}(s) = 0$ for some $s \in F$, potentially producing $n!$ different matrices.
+
+Every row-reduced matrix $A'$ that we produce has an associated collection of pivots which are assumed to be non-zero $P = (a_{i,i})_{i \in \Lambda}$, and a collection of entries which are assumed to be zero $Q = (a_{i,j})_{i \in \Delta}$. In this case, $q \nmid p$ for all $q \in Q, p \in P$. Equivalently, the elements of $P$ are elements of the quotient ring $F[X]/I$, where $I = \langle Q \rangle$.
 
 \section{Preliminaries}
 \label{sec:preliminaries}
@@ -200,18 +208,18 @@ Rather than selecting pivots which are not equal to the zero-polynomial, our met
 \subsubsection{Row Echelon Form}
 
 The setting in which one wants to produce an upper triangular matrix usually involves some desire to solve the equation
-    \begin{equation*}
-      AX = B
-    \end{equation*}
-    where $A$ is an invertible linear transformation, and $X, B$ are vectors (or elements of a free module). One can perform \emph{Gaussian Elimination} to produce an upper triangular matrix (or \emph{Gauss-Jordan Elimination} to produce the reduced row echelon form of a matrix) by applying a sequence of elementary row operations to the system. \\
+\begin{equation*}
+  AX = B
+\end{equation*}
+where $A$ is an invertible linear transformation, and $X, B$ are vectors (or elements of a free module). One can perform \emph{Gaussian Elimination} to produce an upper triangular matrix (or \emph{Gauss-Jordan Elimination} to produce the reduced row echelon form of a matrix) by applying a sequence of elementary row operations to the system. \\
 
-    Now, these elementary row operations can be represented as elementary matrices, say $E_1, \ldots, E_k$. Applied to the original system, we have
-    \begin{align*}
-      E_k \cdots E_1 AX &= E_k \cdots E_1 B\\
-      A'X &= B'
-    \end{align*}
+Now, these elementary row operations can be represented as elementary matrices, say $E_1, \ldots, E_k$. Applied to the original system, we have
+\begin{align*}
+  E_k \cdots E_1 AX &= E_k \cdots E_1 B\\
+  A'X &= B'
+\end{align*}
 
-    We know that these operations do not change the solution to the equation by application of the cancellation law, since elementary matrices are invertible. Then, one may obtain $X$ by back-substitution. If $A$ was not invertible, then a pseudoinverse may be obtained to describe all solutions that satisfy the equation.
+We know that these operations do not change the solution to the equation by application of the cancellation law, since elementary matrices are invertible. Then, one may obtain $X$ by back-substitution. If $A$ was not invertible, then a pseudoinverse may be obtained to describe all solutions that satisfy the equation.
 
 \section{Rings}
 \label{seq:rings}
