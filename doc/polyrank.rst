@@ -20,6 +20,14 @@ polyrank.mmatrix module
     :undoc-members:
     :show-inheritance:
 
+polyrank.utils module
+---------------------
+
+.. automodule:: polyrank.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

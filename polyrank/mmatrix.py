@@ -1,11 +1,16 @@
-from sage.all import *
+# pylint: disable=missing-docstring
+
+# pylint: disable=import-error,wildcard-import
+#from sage.all import *
 
 class MMatrix():
     """
-    Decorator class for a Sage matrix of type :class:`sage.structure.element.Matrix`.
+    Decorator class for a Sage matrix of type :class:`sage.structure.element.M\
+atrix`.
 
     Provides immutable infix operations by returning a new :class:`MMatrix` that
-    represents the result. Specifically, the infix operations ``+``, ``-``, and ``*``
+    represents the result. Specifically, the infix operations ``+``, ``-``, an\
+d ``*``
     are immutable.
 
     Matrix rows can be retrived and set using the ``[]`` notation, note that
@@ -16,8 +21,13 @@ class MMatrix():
     def __init__(self, mat):
         self.matrix = matrix(copy(mat))
         """
-        The underlying Sage matrix - a subtype of :class:`sage.structure.element.Matrix`.
+        The underlying Sage matrix - a subtype of :class:`sage.structure.eleme\
+nt.Matrix`.
         """
+
+    def __repr__(self):
+        """String Representation"""
+        return self.matrix.__repr__()
 
     def __add__(self, other):
         """Infix Addition"""
@@ -37,21 +47,20 @@ class MMatrix():
 
     def __setitem__(self, i, new_row):
         """Set row ``i`` to ``new_row``."""
-        try:
-            self.matrix[i] = new_row
-        except Exception:
-            rows = []
-            for idx, row in enumerate(self.matrix):
-                if idx == i:
-                    rows.append(new_row)
-                else:
-                    rows.append(list(row))
-
-            self.matrix = matrix(rows)
+        self.matrix[i] = new_row
 
     def __deepcopy__(self):
         """Allows usage of ``copy`` on :class:`MMatrix` instance."""
         return MMatrix(self.matrix)
+
+    def rank(self):
+        """Get the rank of :attr:`.matrix`.
+
+        :Returns Type:
+            int
+        """
+
+        return self.matrix.rank()
 
     def row_size(self):
         """
@@ -75,7 +84,7 @@ class MMatrix():
 
         return self.matrix.dimensions()[0]
 
-    def row_reduce(self):
+    def row_reduce(self, ideal=None):
         """
         Row reduce :attr:`.matrix`.
 
@@ -87,32 +96,40 @@ class MMatrix():
 
         """
         new_mat = self.__deepcopy__()
-        non_zero = []
+
+        if ideal:
+            new_mat = self.apply_fn(ideal.reduce)
+
+        branches = []
 
         for i in range(new_mat.max_pivots()):
             if new_mat[i][i] == 0:
                 found_row = False
                 for j in range(i+1, new_mat.row_size()):
-                    if new_mat[i][j] != 0:
+                    if new_mat[j][i] != 0:
                         new_mat.swap_rows(i, j)
                         found_row = True
                         break
                 if not found_row:
-                    return (new_mat, non_zero)
-
-            pivot = new_mat[i][i]
-            non_zero.append(pivot)
-            new_mat.scalar_mult(1/pivot, row=i)
-
-            for j in range(new_mat.row_size()):
-                if i == j:
                     continue
 
-                new_mat.subtract_row(new_mat[j][i], i, j)
+            pivot = new_mat[i][i]
 
-            new_mat.scalar_mult(pivot, row=i)
+            for j in range(new_mat.row_size()):
+                if i == j or new_mat[j][i] == 0:
+                    continue
 
-        return (new_mat, non_zero)
+                target_lcm = lcm(pivot, new_mat[j][i])
+
+                pivot_q = target_lcm / pivot
+                clear_q = target_lcm / new_mat[j][i]
+
+                new_mat.scalar_mult(clear_q, j)
+                new_mat.subtract_row(pivot_q, i, j)
+
+            branches.append(pivot)
+
+        return (new_mat, branches)
 
     def scalar_mult(self, scalar, row=None):
         """
@@ -185,20 +202,21 @@ class MMatrix():
             list
         """
         if not self._is_reduced():
-            raise Exception
+            raise IndexError
 
         return [self[i][i] for i in range(self.max_pivots())]
 
     def _is_reduced(self):
         """
-        Returns ``True`` if :attr:`.matrix` is row reduced, and ``False`` otherwise.
+        Returns ``True`` if :attr:`.matrix` is row reduced, and ``False`` othe\
+rwise.
 
         :Returns Type:
             bool
         """
         for i in range(self.max_pivots()):
             for j in range(i+1, self.row_size()):
-                if self[i][j] != 0:
+                if self[j][i] != 0:
                     return False
 
         return True
@@ -212,14 +230,14 @@ class MMatrix():
         """
         return min(self.row_size(), self.column_size())
 
-    def apply_fn(self, fn, *args, **kwargs):
-        """
-        Apply ``fn`` with positional parameters ``args`` and keyword
+    def apply_fn(self, func, *args, **kwargs):
+        r"""
+        Apply ``func`` with positional parameters ``args`` and keyword
         parameters ``kwargs`` to the entries of :attr:`.matrix`.
 
-        :param function fn: The function to apply to :attr:`.matrix`
-        :param \*args args: Positional parameters to be applied to ``fn``
-        :param \*\*kwargs kwargs: Keyword parameters to be applied to ``fn``
+        :param function func: The function to apply to :attr:`.matrix`
+        :param \*args args: Positional parameters to be applied to ``func``
+        :param \*\*kwargs kwargs: Keyword parameters to be applied to ``func``
 
         :Returns Type:
             :class:`MMatrix`
@@ -229,7 +247,7 @@ class MMatrix():
 
         for i in range(new_mat.row_size()):
             for j in range(new_mat.column_size()):
-                new_mat.update_entry(i, j, fn(new_mat[i][j], *args, **kwargs))
+                new_mat.update_entry(i, j, func(new_mat[i][j], *args, **kwargs))
 
         return new_mat
 
