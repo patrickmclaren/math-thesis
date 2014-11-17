@@ -1,5 +1,3 @@
-\nonstopmode
-
 \documentclass{amsart}
 
 \usepackage{amssymb}
@@ -24,11 +22,7 @@
 \usepackage{listings}
 \renewcommand{\lstlistingname}{Algorithm}
 
-\usepackage{enumerate}
-
-\usepackage{cleveref}
-\crefname{section}{\S}{\S\S}
-\Crefname{section}{\S}{\S\S}
+\usepackage[shortlabels]{enumitem}
 
 \usepackage{csquotes}
 \setquotestyle{american}
@@ -48,475 +42,213 @@
 \newtheorem{remark}[theorem]{Remark}
 
 \DeclareMathOperator{\LCM}{LCM}
+\DeclareMathOperator{\rank}{rank}
 
 \numberwithin{equation}{section}
 
+\usepackage{cleveref}
+\crefname{section}{\S}{\S\S}
+\Crefname{section}{\S}{\S\S}
+
+\usepackage{tikz-cd}
+
+\newcommand{\intodo}[1]{
+  \leavevmode \\
+  \todo[inline]{#1}
+}
+
 \begin{document}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Title Page
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{On the rank of a polynomial matrix}
+\author{Patrick McLaren}
+\email{patrick.mclaren001@umb.edu}
 
-\def\thetitle{On The Rank of a Polynomial Matrix}
-\def\theauthor{Patrick McLaren}
-\def\theemail{patrick.mclaren001@umb.edu}
+\begin{abstract}
+  We show that performing Gaussian elimination on a polynomial matrix defines rank conditions.
+\end{abstract}
 
-\begin{titlepage}
-  \begin{center}
-    \textsc{\LARGE \thetitle}\\[0.75cm]
-    \textsc{By}\\[0.25cm]
-    \textsc{\large \theauthor}\\[1cm]
-  \end{center}
-\end{titlepage}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Abstract
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\thispagestyle{empty}
-
-\section*{Abstract}
-
-\begin{center}
-  \begin{minipage}{0.8\textwidth}
-    \small
-    \begin{flushleft}
-      The abstract goes here.
-    \end{flushleft}
-  \end{minipage}
-\end{center}
-
-\newpage
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Plan
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\thispagestyle{empty}
-
-\section*{Plan}
-
-\subsection*{Overview}
-
-\begin{enumerate}
-\item Statement of problem, motivating example, and outline of methods
-\item Recall basic definitions and theorems of linear algebra including Gaussian Elimination
-\item Introduce polynomial rings, ideals, and gr\"oebner bases (along with all prerequisites, cf. Hilbert Basis Theorem, noetherian rings, A.C.C)
-\item Introduce modules, free modules, finite presentations
-\item Discuss row reducing a polynomial matrix (presentation matrix)
-\item Discuss conditions a matrix has rank $m \leq n$
-\end{enumerate}
-
-\subsection*{Potential References}
-
-I've noted a sharp drop in the number of accessible resources regarding modules over a polynomial ring in several variables, in contrast to the single variable case. Here's a list of references I have recently viewed. I may temporarily block-quote these references for easy viewing in \cref{sec:notes-from-sources}.
-
-\subsubsection*{Module over a Polynomial Ring of Single Variable}
-
-\begin{itemize}
-\item \fullcite{artin2014algebra}
-\end{itemize}
-
-\subsubsection*{Module over a Polynomial Ring of Several Variables}
-
-\begin{itemize}
-\item \fullcite{cox2007ideals}
-\end{itemize}
-
-\subsubsection*{Other}
-
-\begin{itemize}
-\item \fullcite{bruns}
-\end{itemize}
+\maketitle
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Main Content
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newpage
-
-\setcounter{page}{1}
-
 \section{Introduction}
 
-A polynomial matrix is a linear operator on a module over a polynomial ring. The rank of a linear operator on a module is not well defined, however given a polynomial matrix, we can evaluate it's entries on $s \in F$ to produce a matrix $A(s)$ on a vector space. Then, we can proceed to determine the rank of $A(s)$.
+\begin{itemize}
+\item Fulton related the loci associated with a partial permutation to Schubert polynomials in \cite{fulton1992}
+\item For an introductory view to the subject of Schubert varieties and determinantal ideals, see the books by Sturmfels and Miller \cite{miller2005combinatorial}, and Fulton \cite{fulton1998schubert}.
+\end{itemize}
 
-The situation is slightly different if one does not immediately wish to obtain $A(s)$. Perhaps we would like to know about the conditions for which the matrix fails to have rank $m$. Suppose that by manipulating $A$, we can produce a row-reduced echelon form of $A$, say $A'$, such that $\mathrm{rank}\,A(s) = \mathrm{rank}\,A'(s)$. Then, one may examine the pivots to determine the rank. However, this leads to several problems:
+\section{Permutations, Schubert Polynomials, and Schubert Varieties}
 
-\begin{enumerate}
-\item As we manipulate the matrix $A$, we may assume that a given entry $(i,i)$ will be non-zero in $A'(s)$, as shown in \cref{fig:pivot-example}.
-\begin{figure}[h]
-  \centering
-  \begin{align*}
-    \begin{bmatrix}
-      f_1 & \dots & \dots & \dots \\
-      \hdotsfor{4} \\
-      f_i & \dots & \dots & \dots \\
-      \hdotsfor{4}
-    \end{bmatrix} & \overset{\text{pivot by } f_1}{\to} \begin{bmatrix}
-      1 & \dots & \dots & \dots \\
-      \hdotsfor{4} \\
-      0 & \dots & \dots & \dots \\
-      \hdotsfor{4}
-    \end{bmatrix}
-  \end{align*}
-  \caption{Assuming $f_1(s) \not= 0$}
-  \label{fig:pivot-example}
-\end{figure}
+Let $\mathcal{M}_{k \times l}$ denote the vector space of matrices with $k$ rows and $l$ columns.
 
-Rather than selecting pivots which are not equal to the zero-polynomial, our method should consider the possibility that $a_{i,i}(s) = 0$ for some $s \in F$.
-
-\item Pivoting in the traditional manner using Gaussian Eliminiation (i.e. $a_{i,i} \mapsto 1$) produces a block matrix as shown in \cref{fig:gaussian-eliminiation-example}. In this case, by the conclusion of the algorithm, all information regarding the pivots has been lost.
-\begin{figure}[h]
-  \centering
+\begin{definition}
+  Let $w$ be a \emph{partial permutation}. The \emph{matrix Schubert variety} $\overline{X}_w$ inside $\mathcal{M}_{k \times l}$ is the subvariety
   \begin{equation*}
-    \left[
-    \begin{array}{c | c c }
-      \raisebox{0pt}{{\large\mbox{{$I$}}}} & \dots & 0 \\ \hline
-      \vdots & \ddots & \vdots \\
-      0 & \dots & 0
-    \end{array}
-    \right]
+    \overline{X}_w = \{ Z \in \mathcal{M}_{k \times l} \mid \rank(Z_{p \times q}) \leq \rank(w_{p \times q}) \text{ fror all $p$ and $q$} \}
   \end{equation*}
-  \caption{Output of Gaussian Elimination}
-  \label{fig:gaussian-eliminiation-example}
-\end{figure}
-
-\item Depending on our choice of pivots, we could potentially produce multiple matrices $A', A'', \ldots$ from $A$ with the property $\mathrm{rank} \, A'(s) = \mathrm{rank} \, A''(s) = \cdots = \mathrm{rank} \, A(s)$. Given a collection of pivots, say $P', P''$, from $A', A''$, we would like some nice way of comparing $P'$ and $P''$.
-
-\end{enumerate}
-
-\subsection{Outline of Method}
-
-For every pivot $a_{i,i}$ that we choose to be non-zero, we must also take into account the possibility that $a_{i,i}(s) = 0$ for some $s \in F$, potentially producing $n!$ different matrices.
-
-Every row-reduced matrix $A'$ that we produce has an associated collection of pivots which are assumed to be non-zero $P = (a_{i,i})_{i \in \Lambda}$, and a collection of entries which are assumed to be zero $Q = (a_{i,j})_{i \in \Delta}$. In this case, $q \nmid p$ for all $q \in Q, p \in P$. Equivalently, the elements of $P$ are elements of the quotient ring $F[X]/I$, where $I = \langle Q \rangle$.
-
-\section{Preliminaries}
-\label{sec:preliminaries}
-
-\subsection{Review of Linear Algebra}
-
-\subsubsection{Vector Spaces}
-
-\begin{definition}
-    Let $F$ be a field. Let $V$ be a subset of $F$, and suppose that $V$
-    satisfies the following properties
-    \begin{enumerate}[i]
-        \item $v_1, v_2 \in V \implies v_1 + v_2 \in V$
-        \item $v_1 \in V, c \in F \implies c * v_1 \in V$
-    \end{enumerate}
-    In this case, $V$ is said to be a \emph{vector space} over $F$.
+  Also, let $r(w)$ be the $k \times l$ \emph{rank array} whose entry at $(p, q)$ is $r_{pq}(w) = \rank(w_{p \times q})$.
 \end{definition}
 
-\subsubsection{Matrix Representation of a Linear Transformation}
+\begin{definition}
+  Let $w \in \mathcal{M}_{k \times l}$ be a partial permutation. The \emph{Schubert determinantal ideal} $I_w \subset k[\mathbf{x}]$ is generated by all minors $\mathbf{x}_{p \times q}$ of size $1 + r_{pq}(w)$ for all $p$ and $q$, where $\mathbf{x} = (x_{\alpha\beta})$ is the $k \times l$ matrix of variables.
+\end{definition}
 
-\subsubsection{Determinants}
+\begin{proposition}
+  Every partial permutation matrix $w$ can be extended canonically to a square permutation matrix $\overset{\sim}{w}$ whose Schubert determinantal ideal $I_{\overline{w}}$ has the same minimal generating minors as $I_{\overline{w}}$.
+\end{proposition}
 
-\todo[inline]{Include recursive formula as given in \cite{artin2014algebra}
+\begin{proof}
+  TODO
+\end{proof}
 
-\subsubsection{Row Echelon Form}
+\intodo{Show that Schubert varieties are stabilized by the Borel groups $B_\_$ and $B_+$}
 
-The setting in which one wants to produce an upper triangular matrix usually involves some desire to solve the equation
+% Use the natural map $k[\mathbf{x}] \to (k[\mathbf{x}]/I(\overline{X}_{\sigma_iw}))_{\mathfrak{m}}$ from Lemma 15.36 \cite{miller2005combinatorial} (page 303) to connect 
+
+\section{Gaussian Elimination}
+
+Recall that performing Gaussian elimination allows us to solve the equation $AX = B$ by producing matrices $P, L, U$ such that $A = PLU$, where $P$ is a permutation matrix, and $L, U$ are (respectively) lower, and upper triangular matrices. The solution to the equation $AX = B$ is then found by back-substitution.
+
+However, given indeterminate entries $a_{i,j} \in k[\mathbf{x}]$, a decision must be made as to which entries are to be considered zero. Let $Z_A(S)$ denote the entries of $A$ which are equal to zero on $S \subset k^n$, where
 \begin{equation*}
-  AX = B
-\end{equation*}
-where $A$ is an invertible linear transformation, and $X, B$ are vectors (or elements of a free module). One can perform \emph{Gaussian Elimination} to produce an upper triangular matrix (or \emph{Gauss-Jordan Elimination} to produce the reduced row echelon form of a matrix) by applying a sequence of elementary row operations to the system. \\
-
-Now, these elementary row operations can be represented as elementary matrices, say $E_1, \ldots, E_k$. Applied to the original system, we have
-\begin{align*}
-  E_k \cdots E_1 AX &= E_k \cdots E_1 B\\
-  A'X &= B'
-\end{align*}
-
-We know that these operations do not change the solution to the equation by application of the cancellation law, since elementary matrices are invertible. Then, one may obtain $X$ by back-substitution. If $A$ was not invertible, then a pseudoinverse may be obtained to describe all solutions that satisfy the equation.
-
-\section{Rings}
-\label{seq:rings}
-
-\begin{definition}
-  A \emph{ring} is a set $R$ with two binary operations $+, \times$, called addition and multiplication respectively, that satisfy the following properties:
-  \begin{itemize}
-  \item $R, +$ is an abelian group
-  \item $R, *$ is a group
-  \item Distributive property
-    \begin{itemize}
-    \item Left Distributive: $a(b + c) = ab + ac$
-    \item Right Distributive: $(a + b)c = ac + bc$
-    \end{itemize}
-  \end{itemize}
-\end{definition}
-
-A ring in which multiplication is commutative is called a \emph{commutative ring}.
-
-\todo[inline]{Discuss subrings}
-
-\begin{definition}
-  An \emph{ideal} $I$ is a subset of a ring $R$ that satisfies the following properties:
-  \begin{itemize}
-  \item $0 \in I$
-  \item If $a, b \in I$, then $a + b \in I$
-  \item If $a \in I, c \in R$, then $ca \in I$
-  \end{itemize}
-\end{definition}
-
-Given an element $a$ of a ring $R$, the set $(a)$ containing all multiples of $a$ is an ideal, i.e. $0*a = 0 \in (a)$, $a + a = 1*a + 1*a = (1 + 1)*a \in (a)$. In this case, $(a)$ is said to be the \emph{principal ideal generated by $a$}.
-
-\todo[inline]{Discuss Isomorphism Theorems}
-
-\begin{definition}
-  An element $x$ of a ring $R$ is said to be a \emph{zero-divisor} if there exists an element $y \in R$ such that $xy = 0$. If $R$ is a commutative ring, then in this case, $y$ is also a zero-divisor.
-\end{definition}
-
-\begin{definition}
-  A ring with no zero divisors is called an \emph{integral domain}.
-\end{definition}
-
-\begin{definition}
-  An integral domain in which every ideal is principal is called a \emph{principal ideal domain}.
-\end{definition}
-
-\begin{definition}
-  An integral domain $R$ is said to be a \emph{Euclidean Domain} if there is a function $\sigma: R \to \mathbb{Q}$, called the \emph{size function}, such that...
-  \todo{Include properties of size function}
-\end{definition}
-
-\subsection{Polynomial Rings}
-
-\begin{definition}
-  Let $k$ be a field, and let $x$ be an indeterminant. A \emph{polynomial} $f$ is an expression of the form
-  \begin{equation*}
-  f = \sum_{i = 0}^\infty a_ix^i
-  \end{equation*}
-  where $a_i \in k$. In this case, $a_i$ are said to be the \emph{coefficients} of $f$. The term containing the highest power of $x$ with non-zero coefficient, is said to be the \emph{leading term}, and the \emph{degree} of $f$ is the power of $x$ in the leading term. Similarly, we define the \emph{leading coefficient} of $f$ to be the coefficient of the leading term.
-\end{definition}
-
-We can define several operations on polynomials. Given two polynomials $f = \sum_{i = 0}^\infty a_ix^i, g = \sum_{i = 0}^\infty b_ix^i$ we define their sum $f + g$ to be the polynomial whose coefficients are the sum of the corresponding coefficients of $f$ and $g$. That is,
-\begin{equation*}
-  f + g = \sum_{i = 0}^\infty (a_i + b_i)x^i
-\end{equation*}
-The inverse of $f + g$ is denoted $f - g$, wherein the coefficients of $g$ are taken to be their inverses in $k$. Similarly, we define the product of two polynomials $f, g$ to be the expression
-\begin{equation*}
-  f * g = \sum_{i = 0}^\infty \sum_{j = k = 0}^{j + k = i} a_jb_k x^i
+  Z_A(S) = \{ a_{i,j} \in A \mid a_{i,j} \in I(S), S \subset k^n \}
 \end{equation*}
 
-\begin{proposition}
-  Given a field $k$, $k[x]$, the set of all single variable polynomials with coefficients in $k$ is a commutative ring.
-\end{proposition}
-
-\begin{proof}
-  TODO
-\end{proof}
-
-\begin{proposition}
-  The set $k[x, \ldots, x_n]$ of all multivariable polynomials with coefficients in $k$ is also a commutative ring.
-\end{proposition}
-
-\begin{proof}
-  TODO
-\end{proof}
+Now, let $\pi_S$ denote the map that takes $A \mapsto A'$, by $a_{i,j} \mapsto \overline{a_{i,j}} \in k[\mathbf{x}]/Z_A(S)$.
 
 \begin{definition}
-  Let $R[X]$ be as above, and let $f_1, \ldots, f_n$ be polynomials in $R[X]$. We define
+  Let $*$ be the function that sends a polynomial matrix to a matrix with entries in a field by evaluating it's entries, i.e. $a_{i,j} \mapsto a_{i,j}(s)$. We'll usually write $A(s)$ to mean the same.
+\end{definition}
+
+\begin{proposition}
+  Given a subset $S \subset k^n$, the $LU$ factorization of $A(S)$ with pivoting, produces the same factorization as $\pi_S(A) = A'$.
   \begin{equation*}
-    \langle f_1, \ldots f_n \rangle = \left\{ \sum_{i = 1}^n h_i f_i \mid h_1, \ldots, h_n \in R[X] \right\}
+    \begin{tikzcd}
+      A \arrow[dr]{}{*} \arrow[r]{}{\pi_S} & \arrow[r, dashed] A' & \arrow[d]{}{*} P'L'U'\\
+      & A(S) \arrow[r, dashed] & PLU
+    \end{tikzcd}
   \end{equation*}
-\end{definition}
-
-Given polynomials $f_1, \ldots, f_n$, it is easy to see that $\langle f_1, \ldots, f_n \rangle$ is an ideal. Indeed, $h_1 = h_2 = \cdots = h_n = 0$, then $\sum h_i f_i = 0$, so $0 \in \langle f_1, \ldots, f_n \rangle$. For $f_j, f_k \in \{ f_1, \ldots, f_n \}$, set $h_i$ equal to $1$ if $i = j$ or $k$, and $0$ otherwise, so $f_j + f_k \in \langle f_1, \ldots, f_n \rangle$. For $f_k \in \{ f_1, \ldots, f_n \}$, set $h_i = c$ if $i = k$, and $0$ otherwise, so $c f_k \in \langle f_1, \ldots, f_n \rangle$. So, $\langle f_1, \ldots, f_n \rangle$ is an ideal in $R[X]$, namely, the \emph{ideal generated by $f_1, \ldots, f_n$}.
-
-\begin{proposition}
-  Let $k$ be a field, then the polynomial ring of a single variable over $k$, $k[x]$ is a Euclidean domain.
 \end{proposition}
 
 \begin{proof}
-  TODO
+  \intodo{To show this, we'll need to first define LU factorization modulo an ideal. Then, probably proceed by induction using Gaussian elimination.}
 \end{proof}
 
-Note that a polynomial ring of several variables is not a Euclidean domain.
-
-\begin{example}
-  \todo[inline]{Show that $k[x_1, \ldots, x_n]$ is not a Euclidean domain}
-\end{example}
-
-\section{Modules}
-\label{sec:modules}
+What can we say about the rank of $A$ on $S \subset k^n$? Let $V_r \subset k^n$ denote the loci for which $A$ has rank at most $r$. Suppose that all minors are homogeneous, or equivalently,
+\begin{equation*}
+  \mathrm{degree}(a_{i,j}) = p_i + q_j
+\end{equation*}
+for some integers $p_1, \ldots, p_l, q_1, \ldots, q_m$. \todo{See Proposition 5.15 in \emph{Using Algebraic Geometry}} We can determine the degree of $V_r$. Let $A' = PLU$ be the factorization of $A' = \pi_S(A)$ for $S = V_r$.
 
 \begin{definition}
-  Let $R$ be a ring. An \emph{$R$-module} $V$ is an abelian group with a law of composition written $+$, and a scalar multiplication $R \times V \to V$, written $r, v \mapsto rv$, such that
-  \begin{equation}
-  \label{eq:module-definition}
-    1v = v \text{, } (rs)v = r(sv) \text{, } (r + s)v = rv + sv, \text{ and } r(v + v') = rv + rv'
-  \end{equation}
-  for all $r, s \in R, v, v' \in V$.
+  \intodo{Given $V_r$, let $A' = \pi(A, V_r)$. Identify the choice of $r$ pivots used in Gaussian elimination of $A'$. These pivots prescribe rank conditions on $A'$ (this might be a proposition).
+
+If the permutation matrix $P$ in $A' = PLU$ satisfies these rank conditions, add a lemma to show this, then call $P$ the \emph{associated permutation for $A$ under $V_r$}. Otherwise, the define the \emph{associated permutation for $A$ under $V_r$} as the permutation that corresponds to these rank conditions (see \cite{fulton1998schubert}, page 9).}
 \end{definition}
 
-\begin{example}
-  Let $R$ be a ring. Then, $R$ is also an $R$-module, i.e.
-  \begin{align*}
-    a + b &= (a + b) * 1 \text{ and ,} \\
-    ab &= (ab) * 1 \text{, }
-  \end{align*}
-  and so on.
-\end{example}
-
-\begin{definition}
-  Let $V$ be an $R$-module, and let $H$ be a subgroup of $V$ that is also closed under scalar multiplication. In this case, we say that $H$, together with the laws of composition of $V$, is a \emph{submodule} of $V$.
-\end{definition}
-
-\todo[inline]{Discuss Isomorphism Theorems}
-
-\begin{example}
-  Let $R$ be a ring, and let $I \subset R$ be an ideal of $R$.
-
-  \todo[inline]{Show that $I$ is a submodule of the $R$-module $R$}
-\end{example}
-
-\begin{definition}
-  Let $V$ be a $R$-module. An ordered set $B = (v_1, \ldots, v_k)$, where $v_i \in V$ is said to generate $V$ if every element $v \in V$ can be written as a linear combination of the elements of B, i.e.
+\begin{proposition}
+  Let $V_r \subset k^n$ such that $\rank(A(s)) = r$ for all $s \in V_r$. Then, the degree of $V_r$ is given by
   \begin{equation*}
-    v = r_1v_1 + \cdots + r_kv_k
+    \mathfrak{S}_w(p_1, p_2, \ldots, p_l, 0, \ldots, -q_1, -q_2, \ldots, -q_m, 0, \ldots, 0)
   \end{equation*}
-  where $r_i \in R$. Moreover, $V$ is said to be \emph{finitely generated} if there exists a finite set of generators.
-\end{definition}
-
-\todo[inline]{Discuss Free Modules}
-
-\begin{proposition}[Ascending Chain Condition]
-  \label{prop:acc}
-  Let $M$ be an $R$-module, and let $\mathcal{M}$ be the set of submodules of $M$ partially ordered by inclusion (i.e. $M_i \subseteq M_j \land M_j \subseteq M_i \iff M_i = M_j$). Then, the following are equivalent
-  \begin{enumerate}[i]
-  \item \label{prop:acc-stationary} Every increasing sequence $M_1 \subseteq M_2 \subseteq \cdots \in \mathcal{M}$ is stationary (i.e. there exists $n$ such that $M_n = M_{n + 1} = \cdots$).
-  \item \label{prop:acc-maximal} Every non-empty subset of $\mathcal{M}$ has a maximal element.
-  \end{enumerate}
+  where $\mathfrak{S}_w(x_1, \ldots, x_n, y_1, \ldots, y_n)$ is the double Schubert polynomial, and $w$ is the associated permutation for $A$ under $V_r$.
 \end{proposition}
 
 \begin{proof}
-  \begin{itemize}
-  \item \cref{prop:acc-stationary} $implies$ \cref{prop:acc-maximal}
-    If \cref{prop:acc-maximal} is false, then there is a non-empty subset $\mathcal{M'}$ of $\mathcal{M}$ with no maximal element. In this case, $\mathcal{M'}$ is a non-terminating, increasing sequence according to the relation $\subseteq$, which is a contradiction.
-  \item \cref{prop:acc-maximal} $\implies$ \cref{prop:acc-stationary}
-    Let $\mathcal{M'} \subset \mathcal{M}$ be nonempty. By \cref{prop:acc-stationary} $\mathcal{M'}$ terminates, at say, $M_n$, therefore $\mathcal{M'}$ has maximal element $M_n$.
-  \end{itemize}
+  \intodo{Apply proof from \cite{fulton1992}}
 \end{proof}
 
-A module $M$ satisfying \cref{prop:acc} is said to be \emph{Noetherian}. By \emph{Notherian ring}, we mean a ring $R$ that is Noetherian as an $R$-module.
+\section{Rank Conditions of Polynomial Matrices}
 
-\begin{proposition}
-  Let $M$ be a Notherian $R$-module. Then, every submodule of $M$ is finitely generated.
-\end{proposition}
+% \newpage
+% 
+% \section{Old}
+% 
+% A polynomial matrix is a linear operator on a module over a polynomial ring. The rank of a linear operator on a module is not well defined, however given a polynomial matrix, we can evaluate it's entries on $s \in F$ to produce a matrix $A(s)$ on a vector space. Then, we can proceed to determine the rank of $A(s)$.
+% 
+% The situation is slightly different if one does not immediately wish to obtain $A(s)$. Perhaps we would like to know about the conditions for which the matrix fails to have rank $m$. Suppose that by manipulating $A$, we can produce a row-reduced echelon form of $A$, say $A'$, such that $\mathrm{rank}\,A(s) = \mathrm{rank}\,A'(s)$. Then, one may examine the pivots to determine the rank. However, this leads to several problems:
+% 
+% \begin{enumerate}
+% \item As we manipulate the matrix $A$, we may assume that a given entry $(i,i)$ will be non-zero in $A'(s)$, as shown in \cref{fig:pivot-example}.
+% \begin{figure}[h]
+%   \centering
+%   \begin{align*}
+%     \begin{bmatrix}
+%       f_1 & \dots & \dots & \dots \\
+%       \hdotsfor{4} \\
+%       f_i & \dots & \dots & \dots \\
+%       \hdotsfor{4}
+%     \end{bmatrix} & \overset{\text{pivot by } f_1}{\to} \begin{bmatrix}
+%       1 & \dots & \dots & \dots \\
+%       \hdotsfor{4} \\
+%       0 & \dots & \dots & \dots \\
+%       \hdotsfor{4}
+%     \end{bmatrix}
+%   \end{align*}
+%   \caption{Assuming $f_1(s) \not= 0$}
+%   \label{fig:pivot-example}
+% \end{figure}
+% 
+% Rather than selecting pivots which are not equal to the zero-polynomial, our method should consider the possibility that $a_{i,i}(s) = 0$ for some $s \in F$.
+% 
+% \item Pivoting in the traditional manner using Gaussian Eliminiation (i.e. $a_{i,i} \mapsto 1$) produces a block matrix as shown in \cref{fig:gaussian-eliminiation-example}. In this case, by the conclusion of the algorithm, all information regarding the pivots has been lost.
+% \begin{figure}[h]
+%   \centering
+%   \begin{equation*}
+%     \left[
+%     \begin{array}{c | c c }
+%       \raisebox{0pt}{{\large\mbox{{$I$}}}} & \dots & 0 \\ \hline
+%       \vdots & \ddots & \vdots \\
+%       0 & \dots & 0
+%     \end{array}
+%     \right]
+%   \end{equation*}
+%   \caption{Output of Gaussian Elimination}
+%   \label{fig:gaussian-eliminiation-example}
+% \end{figure}
+% 
+% \item Depending on our choice of pivots, we could potentially produce multiple matrices $A', A'', \ldots$ from $A$ with the property $\mathrm{rank} \, A'(s) = \mathrm{rank} \, A''(s) = \cdots = \mathrm{rank} \, A(s)$. Given a collection of pivots, say $P', P''$, from $A', A''$, we would like some nice way of comparing $P'$ and $P''$.
+% 
+% \end{enumerate}
+% 
+% For every pivot $a_{i,i}$ that we choose to be non-zero, we must also take into account the possibility that $a_{i,i}(s) = 0$ for some $s \in F$, potentially producing $n!$ different matrices.
+% 
+% Every row-reduced matrix $A'$ that we produce has an associated collection of pivots which are assumed to be non-zero $P = (a_{i,i})_{i \in \Lambda}$, and a collection of entries which are assumed to be zero $Q = (a_{i,j})_{i \in \Delta}$. In this case, $q \nmid p$ for all $q \in Q, p \in P$. Equivalently, the elements of $P$ are elements of the quotient ring $F[X]/I$, where $I = \langle Q \rangle$.
+% 
+% A generic matrix $A$ of size $m \times l$ has rank $k$ when there exists at least one non-zero $k$ minor whilst $n_{> k}$ minors vanish. These equations define (cut out) a locus of points. There is a large amount of existing literature investigating these points and the ideals generated by the corresponding minors.
+% 
+% When performing Gaussian Elimination to produce a row-echelon matrix, one must make certain assumptions about the value of pivots. In general, a given elimination path will produce an upper triangular matrix $A'$ with $k$ pivots. Then, if the assumptions made regarding the value of the pivots is correct, the rank of $A'$, and thus $A$, is determined by the number of non-zero pivots.
+% 
+% Given an assumption that $f_1 \not= 0, \ldots, f_k \not= 0$, how do these rank conditions relate to the vanishing $k+1$ minors of $A$? 
+% 
+% Note that these points is the intersection of the complement of the varieties of the equations $f_1, \ldots, f_k$.
+% 
+% \begin{itemize}
+% \item given that this minor is a polynomial in the entries of a generic matrix, can this minor be described in terms of permutations?
+% \item the pivots which show up in my computation correspond to rank conditions of the original matrix, in the form of dot diagrams seen in the literature
+% \item thus, a eliminiation path, corresponds to a permutation, and the locus of these points is represented by a double Schubert polynomial (Fulton, page 21, Sturmfels, page 300)
+% \item different loci can be determined through different permutations, equivalent to manipulating Schubert polynomials (Fulton, page 22)
+% \item so different permutations are equivalent to determining different rank conditions, i.e. branching is due to our desire to determine conditions for rank $k \leq n$
+% \item also, different permutations with same rank may provide different loci
+% \item is the rank in elimination equal to some number for permutations, schubert polynomials?
+% \end{itemize}
 
-\begin{proof}
-  TODO
-\end{proof}
+\section{Source Code}
 
-\begin{theorem}[Hilbert Basis Theorem]
-  \label{thm:hilbert-basis}
-  Let $R$ be a Noetherian ring. The polynomial ring $R[x]$ is Noetherian.
-\end{theorem}
+Source code available at \url{https://github.com/patrickmclaren/math-thesis}.
 
-\begin{proof}
-  TODO
-\end{proof}
+\subsection{Code Documentation}
 
-Note that by \cref{tm:hilbert-basis} a polynomial ring $k[x_1, \ldots, x_n]$ over a field $k$ is Noetherian.
-
-\subsection{Gr\"oebner Bases}
-
-\leavevmode
-
-\todo[inline]{Discuss monomial orderings}
-
-\todo{Paraphrase this - copied from Cox, Little \& O'Shea}
-\begin{definition}
-  Fix a monomial order. A finite subset $G = \{ g_1, \ldots, g_t \}$ of an ideal $I$ is said to be a \emph{Gr\"oebner basis} if
-  \begin{equation*}
-    \langle \mathrm{LT}(g_1), \ldots, \mathrm{LT(g_n)} \rangle = \langle \mathrm{LT}(I) \rangle
-  \end{equation*}
-\end{definition}
-
-\begin{proposition}
-  Let $k$ be a field, and let $k[x_1, \ldots, x_n]$ be the polynomial ring of $n$ variables over $k$ with a given monomial ordering. Then every ideal $I \subset k[x_1, \ldots, x_n]$, other than $\{ 0 \}$, has a Gr\"oebner basis $G$. Moreover, $G$ is a basis for $I$.
-\end{proposition}
-
-\begin{proof}
-  TODO
-\end{proof}
-
-\todo[inline]{Discuss reduced Groebner bases, including uniqueness}
-
-\begin{proposition}
-  Let $G$ be a Gr\"oebner basis for $I \subset k[x_1, \ldots, x_n]$, where $k$ is a field, $G^R$, the reduced Gr\"oebner basis of $G$, can be computed as follows:
-  \begin{enumerate}
-    \item \todo[inline]{Show steps to compute reduced Gr\"oebner basis of $G$}
-  \end{enumerate}
-\end{proposition}
-
-\begin{proof}
-  TODO
-\end{proof}
-
-\begin{corollary}
-  Given a Gr\"oebner basis $G$ of size $n$, the computation to produce the reduced Gr\"oebner basis $G^R$ of $G$ is $\mathcal{O}(n)$. \todo{Find my notes discussing this}
-\end{corollary}
-
-\subsection{Matrix Representation of a Linear Operator on a Module}
-
-In this section, let $R = k[x_1, \ldots, x_n]$ be the polynomial ring in $n$ variables over a field $k$, and let $M, N$ be an $R$-modules.
-
-Similar to our discussion on Linear Operators on Vector Spaces (see \cref{sec:preliminaries}), given a linear operator $T: M \to N$, we can produce a \emph{matrix representation} of $T$. Given a basis $\{ e_i \}$ of $M$, i.e. the canonical basis $(0, \ldots, 1, \ldots, 0)$, arrange the mapping of $Te_i$ into a matrix, with $Te_i$ in the $i$th column.
-
-\begin{figure}[h]
-  \todo[inline]{Construct matrix representation of $T$, given basis $\{ e_i \}$}
-\end{figure}
-
-\subsection{Row Echelon Form of a Polynomial Matrix}
-
-\begin{lstlisting}[caption=Computing the Row Echelon Form of a Polynomial Matrix]
-    max_pivots = min(row_size, column_size)
-    for i in (1 ... max_pivots):
-        for j in (1 ... max_pivots):
-            if i == j:
-                continue
-
-            target_lcm = lcm(matrix[i][i], matrix[j][i])
-
-            pivot_quotient = target_lcm / matrix[i][i]
-            clear_quotient = target_lcm / matrix[j][i]
-
-            matrix.scala_mult(clear_quotient, j)
-            matrix.subtract_row(pivot_quotient, i, j)
-\end{lstlisting}
-
-\section{When does a Polynomial Matrix have Rank $\leq$ n?}
-\label{sec:polynomial-matrix}
-
-\section{Examples}
-
-\section{Conclusion}
+Documentation available at \url{https://patrickmclaren.github.io/polyrank-docs}.
 
 \newpage
 
-\section*{Notes from sources}
-\label{sec:notes-from-sources}
+\section{Appendix}
 
-\blockquote[S. Lang, Algebra, pg. 138]{It will be proved in the next section that a vector space over a field is always free, i.e. has a basis. Under certain circumstances, it is a theorem that projective modules are free. In \S 7 we shall prove that a finitely generated projective module over a principle ring is free. In Chapter X, Theorem 4.4 we shall prove that such a module over a local ring is free; in Chapter XVI, Theorem 3.8 we shall prove that a finite flat module over a local ring is free; and in Chapter XXI, Theorem 3.7, we shall prove the Quillen-Suslin theorem that if $A = k[X_1, \ldots, X_n]$ is the polynomial ring over a field $k$, then every finite projective module over $A$ is free.}
-
-\newpage
-
-\section*{Appendix}
-
-\subsection*{Source Code}
-
-\leavevmode \\
-
-\todo[inline]{Include relevant code without inline documentation from https://github.com/patrickmclaren/math-thesis}
-
-\subsection*{Code Documentation}
-
-\leavevmode \\
-
-\todo[inline]{Include documentation (ensure short and unstyled) from https://github.com/patrickmclaren/polyrank-docs}
+\input{appendix.tex}
 
 \newpage
 
