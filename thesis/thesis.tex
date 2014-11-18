@@ -51,6 +51,7 @@
 \Crefname{section}{\S}{\S\S}
 
 \usepackage{tikz-cd}
+\usetikzlibrary{decorations.pathmorphing}
 
 \newcommand{\intodo}[1]{
   \leavevmode \\
@@ -112,23 +113,23 @@ Let $\mathcal{M}_{k \times l}$ denote the vector space of matrices with $k$ rows
 
 Recall that performing Gaussian elimination allows us to solve the equation $AX = B$ by producing matrices $P, L, U$ such that $A = PLU$, where $P$ is a permutation matrix, and $L, U$ are (respectively) lower, and upper triangular matrices. The solution to the equation $AX = B$ is then found by back-substitution.
 
-However, given indeterminate entries $a_{i,j} \in k[\mathbf{x}]$, a decision must be made as to which entries are to be considered zero. Let $Z_A(S)$ denote the entries of $A$ which are equal to zero on $S \subset k^n$, where
+However, given indeterminate entries $a_{i,j} \in k[\mathbf{x}]$, a decision must be made as to which entries are to be considered zero. Let $Z(A, S)$ denote the entries of $A$ which are equal to zero on $S \subset k^n$, where
 \begin{equation*}
-  Z_A(S) = \{ a_{i,j} \in A \mid a_{i,j} \in I(S), S \subset k^n \}
+  Z(A, S) = \{ a_{i,j} \in A \mid a_{i,j} \in I(S), S \subset k^n \}
 \end{equation*}
 
-Now, let $\pi_S$ denote the map that takes $A \mapsto A'$, by $a_{i,j} \mapsto \overline{a_{i,j}} \in k[\mathbf{x}]/Z_A(S)$.
+Now, let $\pi$ denote the map that takes $A \mapsto A'$, by $a_{i,j} \mapsto \overline{a_{i,j}} \in k[\mathbf{x}]/Z(A, S)$.
 
 \begin{definition}
   Let $*$ be the function that sends a polynomial matrix to a matrix with entries in a field by evaluating it's entries, i.e. $a_{i,j} \mapsto a_{i,j}(s)$. We'll usually write $A(s)$ to mean the same.
 \end{definition}
 
 \begin{proposition}
-  Given a subset $S \subset k^n$, the $LU$ factorization of $A(S)$ with pivoting, produces the same factorization as $\pi_S(A) = A'$.
+  Given a subset $S \subset k^n$, the $LU$ factorization of $A(S)$ with pivoting, produces the same factorization as $\pi(A, S) = A'$.
   \begin{equation*}
     \begin{tikzcd}
-      A \arrow[dr]{}{*} \arrow[r]{}{\pi_S} & \arrow[r, dashed] A' & \arrow[d]{}{*} P'L'U'\\
-      & A(S) \arrow[r, dashed] & PLU
+      A \arrow[dr]{}{*} \arrow[r]{}{\pi_S} & \arrow[d]{}{*} (PLU)'\\
+      & PLU
     \end{tikzcd}
   \end{equation*}
 \end{proposition}
@@ -141,7 +142,7 @@ What can we say about the rank of $A$ on $S \subset k^n$? Let $V_r \subset k^n$ 
 \begin{equation*}
   \mathrm{degree}(a_{i,j}) = p_i + q_j
 \end{equation*}
-for some integers $p_1, \ldots, p_l, q_1, \ldots, q_m$. \todo{See Proposition 5.15 in \emph{Using Algebraic Geometry}} We can determine the degree of $V_r$. Let $A' = PLU$ be the factorization of $A' = \pi_S(A)$ for $S = V_r$.
+for some integers $p_1, \ldots, p_l, q_1, \ldots, q_m$. \todo{See Proposition 5.15 in \emph{Using Algebraic Geometry}} We can determine the degree of $V_r$. Let $A' = PLU$ be the factorization of $A' = \pi(A, V_r)$.
 
 \begin{definition}
   \intodo{Given $V_r$, let $A' = \pi(A, V_r)$. Identify the choice of $r$ pivots used in Gaussian elimination of $A'$. These pivots prescribe rank conditions on $A'$ (this might be a proposition).
