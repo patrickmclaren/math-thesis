@@ -1,7 +1,7 @@
 # pylint: disable=missing-docstring
 
 # pylint: disable=import-error,wildcard-import
-#from sage.all import *
+from sage.all import *
 
 class MMatrix():
     """

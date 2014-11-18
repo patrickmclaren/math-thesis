@@ -2,7 +2,7 @@
 less than, or equal to, n."""
 
 # pylint: disable=import-error,wildcard-import
-#from sage.all import *
+from sage.all import *
 from polyrank.mmatrix import MMatrix
 
 import polyrank.utils
