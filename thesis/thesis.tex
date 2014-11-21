@@ -1,12 +1,17 @@
 \documentclass{amsart}
 
+\usepackage{environ}
+\usepackage{xparse}
+
+\usepackage{subcaption}
+
 \usepackage{amssymb}
 
 \usepackage[utf8]{inputenc}
 
-\usepackage[
-  backend=biber,
-  natbib=true
+\usepackage[%
+  backend=biber,%
+  natbib=true%
 ]{biblatex}
 
 \bibliography{thesis}
@@ -14,7 +19,7 @@
 \usepackage{tabularx}
 \newcolumntype{Y}{>{\centering\arraybackslash}X}
 
-\usepackage{todonotes}
+\usepackage[shadow]{todonotes}
 
 \usepackage{hyperref}
 \usepackage[german,english]{babel}
@@ -53,9 +58,20 @@
 \usepackage{tikz-cd}
 \usetikzlibrary{decorations.pathmorphing}
 
-\newcommand{\intodo}[1]{
-  \leavevmode \\
-  \todo[inline]{#1}
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+
+\DeclareDocumentCommand \intodo { o m }
+{
+  \leavevmode\\
+  \IfNoValueTF {#1} {
+    \todo[inline]{#2}
+  }{
+    \todo[inline, #1]{#2}
+  }
+}
+
+\NewEnviron{aroundtodo}[1][]{
+  \intodo[#1]{\BODY}
 }
 
 \begin{document}
@@ -75,6 +91,59 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Introduction}
+
+Given a polynomial matrix, that is, a matrix with polynomial entries, what can we say about its rank? If we were to evaluate the entries of the matrix at a point $P$, then we obtain a matrix with entries from a field. In this case, our matrix will have rank $r$ if it has a non-vanishing $r$-minor, whilst all $k_{> r}$-minors vanish. However, the rank of our matrix at a point $P$ may not be the same for a different point $Q$.
+
+Consider the matrix given in \cref{eq:introduction-linear-matrix}. At $P = (2, 3)$, this matrix will have rank $0$; along the lines $(2, c_1 \not= 3)$ and $(c_2 \not= 2, 3)$, the matrix will have rank $1$;  for all other points, in the quadrants defined by these lines, the matrix will have full rank.
+\begin{equation}
+  \label{eq:introduction-linear-matrix}
+  M_1 =
+  \begin{bmatrix}
+    x - 2 & 0\\
+    0 & y - 3
+  \end{bmatrix}
+\end{equation}
+
+It would be unreasonable to restrict our attention to idealized matrices of the form of \cref{eq:introduction-linear-matrix}. Our method of taking combinations of diagonal entries fails for all non-diagonal matrices. \Cref{eq:introduction-quadratic-matrix} considers a slightly less contrived example.
+\begin{equation}
+  \label{eq:introduction-quadratic-matrix}
+  M_2 =
+  \begin{bmatrix}
+    (x - 1)^2 & (y - 1)^2\\
+    (x - 2)^2 & (y - 2)^2
+  \end{bmatrix}
+\end{equation}
+
+In this case, following our method from the first example, $M_2$ will have ranks given by the following coordinates
+\begin{align}
+  \rank M(P) = 0 \iff P \in &\, (1, c) \cap (2, c) \cap (c, 1) \cap (c, 2) = \emptyset\\
+  \rank M(P) = 1 \iff P \in &\, (1, c) \setminus ((2, c) \cap (c, 1) \cap (c, 2)) \, \bigcup \\
+  &\, (2, c) \setminus ((1, c) \cap (c, 1), \cap (c, 2)) \, \bigcup \notag\\
+  &\, \cdots \notag \\
+  \rank M(P) = 2 \iff P \in &\, \mathbb{R}^2 \setminus \{ (1, 1), (1, 2), (2, 1), (2, 2) \}
+\end{align}
+
+If you look closely at the points excluded as the rank $r$ increases, you'll notice the $r + 1$-minors appearing. At this point, our notation hides the details. Let us consider a generic matrix, given by
+\begin{equation}
+  \label{eq:introduction-generic-matrix}
+  M_3 = \begin{bmatrix}
+    f_1 & f_2\\
+    f_3 & f_4
+  \end{bmatrix}
+  \text{, } f_i \in k[x_1, \ldots, x_n]
+\end{equation}
+
+Now, before we continue our method, define $Z$ to be the function that takes a set of polynomials to their common zeros, i.e. $Z(\{ x - 1, y - 2 \}) = (1, 2)$. Then, the ranks of $M$ are given by
+\begin{align}
+  \rank M(P) = 0 \iff P \in &\, Z(\{ f_1, f_2, f_3, f_4 \})\\
+  \rank M(P) = 1 \iff P \in &\, Z(\{ f_1 \}) \setminus \left( Z(\{ f_2 \}) \cup Z(\{ f_3 \}) \cup Z(\{ f_4 \}) \right) \, \bigcup \\
+  &\, Z(\{ f_2 \}) \setminus \left( Z(\{ f_1 \}) \cup Z(\{ f_3 \}) \cup Z(\{ f_4 \}) \right) \, \bigcup \notag\\
+  &\, Z(\{ f_3 \}) \setminus \left( Z(\{ f_1 \}) \cup Z(\{ f_2 \}) \cup Z(\{ f_4 \}) \right) \, \bigcup \notag\\
+  &\, Z(\{ f_4 \}) \setminus \left( Z(\{ f_1 \}) \cup Z(\{ f_2 \}) \cup Z(\{ f_3 \}) \right) \notag\\
+  \rank M(P) = 2 \iff P \in &\, \mathbb{R}^2 \setminus \left( Z(\{ f_1\}) \cup Z(\{ f_2\}) \cup Z(\{f_3\}) \cup Z(\{f_4 \}) \right)
+\end{align}
+
+What can we say, in general, about an $m \times m$ matrix $M$ with entries $m_{i,j}$ in the polynomial ring $k[x_1, \ldots, x_n]$ over a field $k$? How is the loci of points for which $M$ has rank $r$ related to the space within which $M$ resides?
 
 \begin{itemize}
 \item Fulton related the loci associated with a partial permutation to Schubert polynomials in \cite{fulton1992}
@@ -107,18 +176,38 @@ Let $\mathcal{M}_{k \times l}$ denote the vector space of matrices with $k$ rows
 
 \intodo{Show that Schubert varieties are stabilized by the Borel groups $B_\_$ and $B_+$}
 
-% Use the natural map $k[\mathbf{x}] \to (k[\mathbf{x}]/I(\overline{X}_{\sigma_iw}))_{\mathfrak{m}}$ from Lemma 15.36 \cite{miller2005combinatorial} (page 303) to connect 
+% Use the natural map $k[\mathbf{x}] \to (k[\mathbf{x}]/I(\overline{X}_{\sigma_iw}))_{\mathfrak{m}}$ from Lemma 15.36 \cite{miller2005combinatorial} (page 303) to connect
 
 \section{Gaussian Elimination}
 
+\begin{aroundtodo}[prepend, caption={\textbf{Alternative Approach}}, color=green!40]
+  \leavevmode\\
+  Let $R = k[x_1, \ldots, x_n]$ be a polynomial ring, let $A, B$ be $R$-modules, and let $T: A \to B$ be a $R$-module homomorphism. Then given a basis $(\vec{e}_i)_{i \leq n}$ for $A$, we obtain $M$, the \emph{matrix representation of $T$}, where
+  \begin{equation*}
+    M = \left[
+      \begin{array}{c | c | c}
+        T(\vec{e}_1) & \cdots & T(\vec{e}_n)
+      \end{array}
+      \right]
+  \end{equation*}
+  \begin{proposition}[\cite{MR0463157}, 2.2.6]
+    Let $k$ be an algebraically closed field. There is a natural fully faithful functor $t: \mathfrak{Var}(k) \to \mathfrak{Sch}(k)$ from the category of varieties over $k$ to schemes over $k$. For any variety $V$, its topological space is homeomorphic to the set of closed points of $\mathrm{sp}(t(V))$, and its sheaf of regular functions is obtained by restricting the structure sheaf of $t(V)$ via this homeomorphism.
+  \end{proposition}
+\end{aroundtodo}
+
 Recall that performing Gaussian elimination allows us to solve the equation $AX = B$ by producing matrices $P, L, U$ such that $A = PLU$, where $P$ is a permutation matrix, and $L, U$ are (respectively) lower, and upper triangular matrices. The solution to the equation $AX = B$ is then found by back-substitution.
 
-However, given indeterminate entries $a_{i,j} \in k[\mathbf{x}]$, a decision must be made as to which entries are to be considered zero. Let $Z(A, S)$ denote the entries of $A$ which are equal to zero on $S \subset k^n$, where
+However, given indeterminate entries $a_{i,j} \in k[\mathbf{x}]$, a decision must be made as to which entries are to be considered zero. Let $I(A, S)$ denote the entries of $A$ which are equal to zero on $S \subset k^n$, where
 \begin{equation*}
-  Z(A, S) = \{ a_{i,j} \in A \mid a_{i,j} \in I(S), S \subset k^n \}
+  I(A, S) = \{ a_{i,j} \in A \mid a_{i,j} \in I(S), S \subset k^n \}
 \end{equation*}
-
-Now, let $\pi$ denote the map that takes $A \mapsto A'$, by $a_{i,j} \mapsto \overline{a_{i,j}} \in k[\mathbf{x}]/Z(A, S)$.
+Now, let $\pi$ denote the map that takes $A \mapsto A'$, by $a_{i,j} \mapsto \overline{a_{i,j}} \in k[\mathbf{x}]/I(A, S)$.
+\begin{aroundtodo}[caption={}]
+  Why care about $I(A, S)$, why not just use $I(S)$? Then, we can just use $a_{i,j} \mapsto \overline{a_{i,j}} \in k[x_1, \ldots, x_n]/I(S)$, where
+  \begin{equation*}
+    k[x_1, \ldots, x_n]/I(S) \eqsim \mathcal{O}(S)
+  \end{equation*}
+\end{aroundtodo}
 
 \begin{definition}
   Let $*$ be the function that sends a polynomial matrix to a matrix with entries in a field by evaluating it's entries, i.e. $a_{i,j} \mapsto a_{i,j}(s)$. We'll usually write $A(s)$ to mean the same.
@@ -145,9 +234,11 @@ What can we say about the rank of $A$ on $S \subset k^n$? Let $V_r \subset k^n$ 
 for some integers $p_1, \ldots, p_l, q_1, \ldots, q_m$. \todo{See Proposition 5.15 in \emph{Using Algebraic Geometry}} We can determine the degree of $V_r$. Let $A' = PLU$ be the factorization of $A' = \pi(A, V_r)$.
 
 \begin{definition}
-  \intodo{Given $V_r$, let $A' = \pi(A, V_r)$. Identify the choice of $r$ pivots used in Gaussian elimination of $A'$. These pivots prescribe rank conditions on $A'$ (this might be a proposition).
+  \begin{aroundtodo}
+    Given $V_r$, let $A' = \pi(A, V_r)$. Identify the choice of $r$ pivots used in Gaussian elimination of $A'$. These pivots prescribe rank conditions on $A'$ (this might be a proposition).
 
-If the permutation matrix $P$ in $A' = PLU$ satisfies these rank conditions, add a lemma to show this, then call $P$ the \emph{associated permutation for $A$ under $V_r$}. Otherwise, the define the \emph{associated permutation for $A$ under $V_r$} as the permutation that corresponds to these rank conditions (see \cite{fulton1998schubert}, page 9).}
+    If the permutation matrix $P$ in $A' = PLU$ satisfies these rank conditions, add a lemma to show this, then call $P$ the \emph{associated permutation for $A$ under $V_r$}. Otherwise, the define the \emph{associated permutation for $A$ under $V_r$} as the permutation that corresponds to these rank conditions (see \cite{fulton1998schubert}, page 9).
+  \end{aroundtodo}
 \end{definition}
 
 \begin{proposition}
@@ -165,13 +256,13 @@ If the permutation matrix $P$ in $A' = PLU$ satisfies these rank conditions, add
 \section{Rank Conditions of Polynomial Matrices}
 
 % \newpage
-% 
+%
 % \section{Old}
-% 
+%
 % A polynomial matrix is a linear operator on a module over a polynomial ring. The rank of a linear operator on a module is not well defined, however given a polynomial matrix, we can evaluate it's entries on $s \in F$ to produce a matrix $A(s)$ on a vector space. Then, we can proceed to determine the rank of $A(s)$.
-% 
+%
 % The situation is slightly different if one does not immediately wish to obtain $A(s)$. Perhaps we would like to know about the conditions for which the matrix fails to have rank $m$. Suppose that by manipulating $A$, we can produce a row-reduced echelon form of $A$, say $A'$, such that $\mathrm{rank}\,A(s) = \mathrm{rank}\,A'(s)$. Then, one may examine the pivots to determine the rank. However, this leads to several problems:
-% 
+%
 % \begin{enumerate}
 % \item As we manipulate the matrix $A$, we may assume that a given entry $(i,i)$ will be non-zero in $A'(s)$, as shown in \cref{fig:pivot-example}.
 % \begin{figure}[h]
@@ -192,9 +283,9 @@ If the permutation matrix $P$ in $A' = PLU$ satisfies these rank conditions, add
 %   \caption{Assuming $f_1(s) \not= 0$}
 %   \label{fig:pivot-example}
 % \end{figure}
-% 
+%
 % Rather than selecting pivots which are not equal to the zero-polynomial, our method should consider the possibility that $a_{i,i}(s) = 0$ for some $s \in F$.
-% 
+%
 % \item Pivoting in the traditional manner using Gaussian Eliminiation (i.e. $a_{i,i} \mapsto 1$) produces a block matrix as shown in \cref{fig:gaussian-eliminiation-example}. In this case, by the conclusion of the algorithm, all information regarding the pivots has been lost.
 % \begin{figure}[h]
 %   \centering
@@ -210,23 +301,23 @@ If the permutation matrix $P$ in $A' = PLU$ satisfies these rank conditions, add
 %   \caption{Output of Gaussian Elimination}
 %   \label{fig:gaussian-eliminiation-example}
 % \end{figure}
-% 
+%
 % \item Depending on our choice of pivots, we could potentially produce multiple matrices $A', A'', \ldots$ from $A$ with the property $\mathrm{rank} \, A'(s) = \mathrm{rank} \, A''(s) = \cdots = \mathrm{rank} \, A(s)$. Given a collection of pivots, say $P', P''$, from $A', A''$, we would like some nice way of comparing $P'$ and $P''$.
-% 
+%
 % \end{enumerate}
-% 
+%
 % For every pivot $a_{i,i}$ that we choose to be non-zero, we must also take into account the possibility that $a_{i,i}(s) = 0$ for some $s \in F$, potentially producing $n!$ different matrices.
-% 
+%
 % Every row-reduced matrix $A'$ that we produce has an associated collection of pivots which are assumed to be non-zero $P = (a_{i,i})_{i \in \Lambda}$, and a collection of entries which are assumed to be zero $Q = (a_{i,j})_{i \in \Delta}$. In this case, $q \nmid p$ for all $q \in Q, p \in P$. Equivalently, the elements of $P$ are elements of the quotient ring $F[X]/I$, where $I = \langle Q \rangle$.
-% 
+%
 % A generic matrix $A$ of size $m \times l$ has rank $k$ when there exists at least one non-zero $k$ minor whilst $n_{> k}$ minors vanish. These equations define (cut out) a locus of points. There is a large amount of existing literature investigating these points and the ideals generated by the corresponding minors.
-% 
+%
 % When performing Gaussian Elimination to produce a row-echelon matrix, one must make certain assumptions about the value of pivots. In general, a given elimination path will produce an upper triangular matrix $A'$ with $k$ pivots. Then, if the assumptions made regarding the value of the pivots is correct, the rank of $A'$, and thus $A$, is determined by the number of non-zero pivots.
-% 
-% Given an assumption that $f_1 \not= 0, \ldots, f_k \not= 0$, how do these rank conditions relate to the vanishing $k+1$ minors of $A$? 
-% 
+%
+% Given an assumption that $f_1 \not= 0, \ldots, f_k \not= 0$, how do these rank conditions relate to the vanishing $k+1$ minors of $A$?
+%
 % Note that these points is the intersection of the complement of the varieties of the equations $f_1, \ldots, f_k$.
-% 
+%
 % \begin{itemize}
 % \item given that this minor is a polynomial in the entries of a generic matrix, can this minor be described in terms of permutations?
 % \item the pivots which show up in my computation correspond to rank conditions of the original matrix, in the form of dot diagrams seen in the literature
